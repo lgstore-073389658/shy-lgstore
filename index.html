@@ -1,0 +1,814 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-H5R0H8PW7H"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+    
+      gtag('config', 'G-H5R0H8PW7H');
+    </script>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="description" content="尚合雅 LG 月付美好計畫：零頭期款、原廠保固、期滿產權歸您。提供月租費即時試算與線上諮詢預約。">
+
+    <!-- PWA -->
+    <meta name="theme-color" content="#FFFFFF">
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+    <link rel="shortcut icon" href="icons/favicon.ico">
+    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="尚合雅LG">
+    <meta name="format-detection" content="telephone=no">
+    <title>尚合雅 LG 月付美好計畫 | 輕鬆享用高階家電生活</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter & Noto Sans TC -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        lg: {
+                            red: '#C40046',
+                            darkRed: '#9E0038',
+                            lightBg: '#FAFAFA'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Noto Sans TC', 'Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* ===== RWD / PWA 基礎 ===== */
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: 6rem;          /* 錨點跳轉時不被 sticky header 遮住 */
+            -webkit-text-size-adjust: 100%;
+        }
+        body {
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+            overscroll-behavior-y: none;
+        }
+        /* 瀏海 / 動態島：header 避開狀態列 (standalone 模式) */
+        header.sticky {
+            padding-top: env(safe-area-inset-top);
+        }
+        footer {
+            padding-bottom: calc(3rem + env(safe-area-inset-bottom));
+        }
+        /* 手機輸入框 16px，避免 iOS 聚焦時自動放大 */
+        input, select, textarea { font-size: 16px; }
+        /* 觸控裝置最小點擊區域 */
+        button, a.rounded-full, #mobileMenu a { min-height: 44px; }
+        img, svg, video { max-width: 100%; height: auto; }
+        /* 超窄螢幕 (<360px) 縮小標題避免爆版 */
+        @media (max-width: 359px) {
+            h1 { font-size: 1.65rem !important; }
+            h2 { font-size: 1.5rem !important; }
+        }
+        /* 手機版段落間距縮小 */
+        @media (max-width: 639px) {
+            section.py-20 { padding-top: 3.5rem; padding-bottom: 3.5rem; }
+        }
+        /* 尊重使用者「減少動態效果」設定 */
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+        }
+        /* 已安裝為 App (standalone) 時隱藏安裝提示 */
+        @media (display-mode: standalone) {
+            #installBanner { display: none !important; }
+        }
+        /* PWA 提示元件 */
+        .pwa-toast {
+            position: fixed;
+            left: 50%;
+            bottom: calc(1rem + env(safe-area-inset-bottom));
+            transform: translate(-50%, 150%);
+            transition: transform .35s ease, visibility .35s;
+            visibility: hidden;
+            z-index: 100;
+            width: calc(100% - 2rem);
+            max-width: 28rem;
+        }
+        .pwa-toast.show { transform: translate(-50%, 0); visibility: visible; }
+        .hero-gradient {
+            background: linear-gradient(135deg, #0f172a 0%, #1c1917 40%, #881337 100%);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(14px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans leading-relaxed text-base">
+
+    <!-- 離線 / 上線狀態提示 -->
+    <div id="netToast" class="pwa-toast" role="status" aria-live="polite">
+        <div id="netToastInner" class="rounded-2xl px-5 py-3 text-sm font-bold text-white shadow-2xl text-center"></div>
+    </div>
+
+    <!-- 安裝 App 橫幅 (Android / Chrome / Edge) -->
+    <div id="installBanner" class="pwa-toast" role="dialog" aria-label="安裝應用程式">
+        <div class="bg-white rounded-2xl shadow-2xl border border-gray-200 p-4 flex items-center gap-3">
+            <img src="icons/icon-96.png" alt="" width="48" height="48" class="w-12 h-12 rounded-xl flex-shrink-0">
+            <div class="flex-1 min-w-0">
+                <p class="font-bold text-gray-900 text-sm leading-tight">安裝「尚合雅 LG」App</p>
+                <p id="installHint" class="text-xs text-gray-500 mt-0.5 leading-snug">加到主畫面，一鍵開啟、離線也能瀏覽</p>
+            </div>
+            <button id="installBtn" class="bg-lg-red hover:bg-lg-darkRed text-white text-sm font-bold px-4 rounded-full flex-shrink-0">安裝</button>
+            <button id="installClose" class="text-gray-400 hover:text-gray-600 px-1 flex-shrink-0" aria-label="關閉">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- 新版本提示 -->
+    <div id="updateToast" class="pwa-toast" role="alert">
+        <div class="bg-gray-900 text-white rounded-2xl shadow-2xl px-5 py-3 flex items-center justify-between gap-3">
+            <span class="text-sm font-bold">有新版本可用</span>
+            <button id="updateBtn" class="bg-lg-red text-white text-sm font-bold px-4 rounded-full">立即更新</button>
+        </div>
+    </div>
+
+    <!-- 頂部導覽列 Navigation -->
+    <header class="sticky top-0 z-50 bg-white/95 backdrop-blur shadow-sm border-b border-gray-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between">
+            <!-- 品牌 Logo -->
+            <a href="#" class="flex items-center gap-3 group min-w-0" aria-label="尚合雅 SHY APPLIANCE 回到頂端">
+                <img src="icons/logo.png" alt="尚合雅 整合規劃 SHY APPLIANCE" width="620" height="120"
+                     class="h-10 sm:h-12 w-auto flex-shrink-0 transition-transform group-hover:scale-105">
+                <span class="hidden lg:block border-l border-gray-200 pl-3 text-xs text-gray-500 font-medium tracking-wider leading-snug">LG 月付美好計畫<br>專賣</span>
+            </a>
+
+            <!-- 選單項目 (Desktop) -->
+            <nav class="hidden md:flex items-center space-x-8 text-base font-semibold">
+                <a href="#about" class="text-gray-700 hover:text-lg-red transition-colors">計畫特色</a>
+                <a href="#products" class="text-gray-700 hover:text-lg-red transition-colors">精選商品</a>
+                <a href="#calculator" class="text-gray-700 hover:text-lg-red transition-colors">月租試算</a>
+                <a href="#faq" class="text-gray-700 hover:text-lg-red transition-colors">常見問題</a>
+            </nav>
+
+            <!-- 行動按鈕 -->
+            <div class="flex items-center space-x-4">
+                <a href="#contact" class="hidden sm:inline-flex bg-lg-red hover:bg-lg-darkRed text-white px-7 py-3 rounded-full text-base font-bold shadow-lg shadow-red-100 transition-all hover:scale-105">
+                    線上諮詢預約
+                </a>
+                <button id="mobileMenuBtn" class="md:hidden text-gray-700 focus:outline-none p-2" aria-label="開啟選單" aria-expanded="false" aria-controls="mobileMenu">
+                    <i class="fa-solid fa-bars text-2xl"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- 手機選單 Mobile Menu -->
+        <div id="mobileMenu" class="hidden md:hidden bg-white border-b border-gray-200 px-6 pt-3 pb-6 space-y-4 shadow-xl">
+            <a href="#about" class="block text-lg font-bold text-gray-800 hover:text-lg-red py-1">計畫特色</a>
+            <a href="#products" class="block text-lg font-bold text-gray-800 hover:text-lg-red py-1">精選商品</a>
+            <a href="#calculator" class="block text-lg font-bold text-gray-800 hover:text-lg-red py-1">月租試算</a>
+            <a href="#faq" class="block text-lg font-bold text-gray-800 hover:text-lg-red py-1">常見問題</a>
+            <a href="#contact" class="block w-full text-center bg-lg-red text-white py-3.5 rounded-xl font-bold text-base mt-2 shadow-md">線上諮詢預約</a>
+        </div>
+    </header>
+
+    <!-- 主視覺區 Hero Section -->
+    <section class="hero-gradient text-white py-16 sm:py-24 lg:py-28 relative overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid md:grid-cols-12 gap-10 lg:gap-12 items-center">
+                
+                <!-- 左側文案 -->
+                <div class="md:col-span-7 space-y-6 text-center md:text-left">
+                    <span class="inline-flex items-center gap-2 bg-white/10 backdrop-blur border border-white/20 text-red-200 text-sm px-4 py-1.5 rounded-full font-bold tracking-wide">
+                        <i class="fa-solid fa-gem text-xs text-red-300"></i> 尚合雅門市專案 ‧ LG 原廠品質保障
+                    </span>
+                    <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight leading-tight">
+                        LG 月付美好計畫<br/>
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-red-400 via-pink-300 to-red-200">
+                            輕鬆負擔 ‧ 品質生活無壓力
+                        </span>
+                    </h1>
+                    <p class="text-gray-300 text-base sm:text-lg lg:text-xl max-w-2xl mx-auto md:mx-0 font-normal leading-relaxed">
+                        無需一次性繳納數萬元！按月小額支付輕鬆入住 LG 旗艦家電，涵蓋原廠保固與到府維護服務。
+                    </p>
+                    <div class="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-4 justify-center md:justify-start pt-4">
+                        <a href="#calculator" class="bg-lg-red hover:bg-lg-darkRed text-white px-8 py-4 rounded-full font-bold text-lg text-center shadow-xl transition-all hover:scale-105 flex items-center justify-center">
+                            <i class="fa-solid fa-calculator mr-2"></i> 月費試算器
+                        </a>
+                        <a href="#products" class="glass-card hover:bg-white/20 text-white px-8 py-4 rounded-full font-bold text-lg text-center transition-all flex items-center justify-center">
+                            瀏覽熱門家電
+                        </a>
+                    </div>
+                </div>
+
+                <!-- 右側亮點卡片 -->
+                <div class="md:col-span-5 flex justify-center">
+                    <div class="w-full max-w-md glass-card rounded-3xl p-6 sm:p-8 shadow-2xl space-y-5 border border-white/20">
+                        <div class="flex justify-between items-center pb-4 border-b border-white/15">
+                            <span class="text-lg font-bold text-white flex items-center">
+                                <i class="fa-solid fa-star text-yellow-400 mr-2"></i> 美好計畫三大保障
+                            </span>
+                            <!-- 更正右上角紅色標題 -->
+                            <span class="text-xs sm:text-sm bg-lg-red text-white font-bold px-3 py-1.5 rounded-full shadow">
+                                不占信用卡額度 / 輕鬆分期
+                            </span>
+                        </div>
+                        <ul class="space-y-4 text-base text-gray-200">
+                            <li class="flex items-start">
+                                <i class="fa-solid fa-circle-check text-red-400 text-lg mr-3 mt-0.5"></i>
+                                <span><strong>0 元頭期款入住：</strong>免一次付清大額資金，預算掌控更彈性。</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fa-solid fa-circle-check text-red-400 text-lg mr-3 mt-0.5"></i>
+                                <span><strong>原廠免費維修：</strong>合約期間享原廠延長保固與專人到府維護。</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fa-solid fa-circle-check text-red-400 text-lg mr-3 mt-0.5"></i>
+                                <span><strong>期滿產權歸您：</strong>租約期滿繳清後機台留用，無須退還。</span>
+                            </li>
+                        </ul>
+                        <div class="pt-3 text-xs text-gray-400 text-center border-t border-white/10">
+                            * 詳細申請與期數規範以尚合雅專員解說為準
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- 計畫核心優勢 Advantages -->
+    <section id="about" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span class="text-sm font-extrabold text-lg-red tracking-wider uppercase">PLAN HIGHLIGHTS</span>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-900 mt-2">為什麼選擇「尚合雅 LG月付美好計畫」？</h2>
+                <p class="text-gray-600 mt-4 text-base sm:text-lg">提供靈活且聰明的家電升級模式，輕鬆升級高品質居家環境。</p>
+            </div>
+
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- 特色 1 -->
+                <div class="bg-gray-50 p-8 rounded-2xl border border-gray-100 hover:border-red-200 hover:shadow-xl transition-all duration-300">
+                    <div class="w-14 h-14 bg-red-100 text-lg-red rounded-2xl flex items-center justify-center text-2xl mb-6">
+                        <i class="fa-solid fa-wallet"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">零頭期款 低負擔</h3>
+                    <p class="text-sm text-gray-600 leading-relaxed">不必一次準備龐大資金，按月支付輕鬆擁有頂級家電，財務規劃更靈活。</p>
+                </div>
+                <!-- 特色 2 -->
+                <div class="bg-gray-50 p-8 rounded-2xl border border-gray-100 hover:border-red-200 hover:shadow-xl transition-all duration-300">
+                    <div class="w-14 h-14 bg-red-100 text-lg-red rounded-2xl flex items-center justify-center text-2xl mb-6">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">原廠安心保固</h3>
+                    <p class="text-sm text-gray-600 leading-relaxed">合約期內享 LG 官方原廠保固權益，機器異常均由原廠工程師檢修。</p>
+                </div>
+                <!-- 特色 3 -->
+                <div class="bg-gray-50 p-8 rounded-2xl border border-gray-100 hover:border-red-200 hover:shadow-xl transition-all duration-300">
+                    <div class="w-14 h-14 bg-red-100 text-lg-red rounded-2xl flex items-center justify-center text-2xl mb-6">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">定期專業保養</h3>
+                    <p class="text-sm text-gray-600 leading-relaxed">指定品項享有原廠定期清潔保養與維護，維持家電運轉最佳效率。</p>
+                </div>
+                <!-- 特色 4 -->
+                <div class="bg-gray-50 p-8 rounded-2xl border border-gray-100 hover:border-red-200 hover:shadow-xl transition-all duration-300">
+                    <div class="w-14 h-14 bg-red-100 text-lg-red rounded-2xl flex items-center justify-center text-2xl mb-6">
+                        <i class="fa-solid fa-house-laptop"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">期滿產權歸您</h3>
+                    <p class="text-sm text-gray-600 leading-relaxed">期滿繳清所有約定月付金後，家電所有權自動歸您，不需收回或退還。</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 精選家電展示 Products Section -->
+    <section id="products" class="py-20 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row md:items-end justify-between mb-12">
+                <div>
+                    <span class="text-sm font-extrabold text-lg-red tracking-wider uppercase">FEATURED PRODUCTS</span>
+                    <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-900 mt-2">尚合雅熱門 LG 家電月付方案</h2>
+                </div>
+                <p class="text-gray-500 mt-3 md:mt-0 text-base font-medium">商品照片與月付價格取自尚合雅官方商店</p>
+            </div>
+
+            <!-- 商品卡片網格 (由下方 PRODUCTS 資料渲染) -->
+            <div id="productGrid" class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8"></div>
+
+            <p class="text-xs text-gray-500 mt-8 leading-relaxed">
+                * 顯示價格為官網商品頁所列月付金額，實際期數 (三年／五年／七年)、服務內容與優惠以
+                <a href="https://www.lgstore.com.tw/pages/rent" target="_blank" rel="noopener" class="text-lg-red underline">尚合雅官方商店</a>
+                商品頁及合約為準。產品圖片僅供說明之用，可能與實際產品不同。
+            </p>
+        </div>
+    </section>
+
+    <!-- 試算器區塊 Calculator Section -->
+    <section id="calculator" class="py-20 bg-white">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-3xl p-8 sm:p-12 text-white shadow-2xl relative overflow-hidden border border-gray-700">
+                <div class="absolute -right-8 -bottom-8 opacity-10 text-9xl text-white font-extrabold pointer-events-none select-none">
+                    LG
+                </div>
+
+                <div class="text-center max-w-2xl mx-auto mb-10">
+                    <h2 class="text-3xl sm:text-4xl font-extrabold">月負擔即時試算器</h2>
+                    <p class="text-gray-300 text-base mt-3">靈活試算每月款項與總支出，讓居家品質升級更聰明</p>
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-8 lg:gap-12 items-stretch relative z-10">
+                    <!-- 控制項 -->
+                    <div class="space-y-6 flex flex-col justify-center">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-300 mb-2">試算品項名稱</label>
+                            <input type="text" id="calcProductName" value="LG ALL NEW Styler 蒸氣電子衣櫥 E523MR" class="w-full bg-gray-700/60 border border-gray-600 rounded-xl px-4 py-3 text-white text-base focus:outline-none focus:border-red-500">
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-300 mb-2">預估月付金額 (NT$)</label>
+                            <div class="relative">
+                                <span class="absolute left-4 top-3.5 text-gray-400 font-bold">$</span>
+                                <input type="number" id="calcMonthlyFee" value="949" class="w-full bg-gray-700/60 border border-gray-600 rounded-xl pl-9 pr-4 py-3 text-white text-base font-bold focus:outline-none focus:border-red-500">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-300 mb-2">約定分期選擇</label>
+                            <div class="grid grid-cols-2 gap-4">
+                                <button onclick="setTenure(36)" id="btn36" class="tenure-btn py-3 px-4 rounded-xl border border-red-500 bg-lg-red text-white font-bold text-base transition-all shadow-md">
+                                    36 期 (3年)
+                                </button>
+                                <button onclick="setTenure(60)" id="btn60" class="tenure-btn py-3 px-4 rounded-xl border border-gray-600 bg-gray-700/50 text-gray-300 font-bold text-base transition-all">
+                                    60 期 (5年)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 結果顯示區域 -->
+                    <div class="bg-gray-800/90 backdrop-blur border border-gray-700 rounded-2xl p-6 sm:p-8 flex flex-col justify-between text-center">
+                        <div class="space-y-6">
+                            <span class="text-xs font-bold text-red-400 tracking-wider uppercase border border-red-400/30 px-3 py-1 rounded-full">試算結果概要</span>
+                            <div>
+                                <span class="text-gray-400 text-sm block mb-1">預估每月支付金額</span>
+                                <span id="displayMonthly" class="text-4xl sm:text-5xl font-black text-red-400">NT$ 949</span>
+                            </div>
+
+                            <div class="py-4 border-t border-b border-gray-700/60 space-y-3">
+                                <div class="flex justify-between text-base text-gray-300">
+                                    <span>分期期數：</span>
+                                    <span id="displayTenure" class="font-bold text-white">36 個月</span>
+                                </div>
+                                <div class="flex justify-between text-base text-gray-300">
+                                    <span>預估專案總費用：</span>
+                                    <span id="displayTotal" class="font-bold text-white">NT$ 46,764</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <a href="#contact" class="mt-8 w-full bg-lg-red hover:bg-lg-darkRed text-white font-bold text-lg py-3.5 rounded-xl block text-center shadow-lg transition-colors">
+                            帶入此方案專人諮詢
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 常見問題 FAQ -->
+    <section id="faq" class="py-20 bg-gray-50">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-14">
+                <span class="text-sm font-extrabold text-lg-red tracking-wider uppercase">FREQUENTLY ASKED QUESTIONS</span>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-900 mt-2">常見問題解答</h2>
+            </div>
+
+            <div class="space-y-4">
+                <!-- Q1 -->
+                <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+                    <button onclick="toggleFaq(1)" class="w-full px-6 py-5 text-left flex justify-between items-center font-bold text-gray-900 text-lg focus:outline-none">
+                        <span>Q1. 申辦「月付美好計畫」需要具備哪些條件？</span>
+                        <i id="faqIcon-1" class="fa-solid fa-chevron-down text-gray-400 transition-transform duration-300"></i>
+                    </button>
+                    <div id="faqAns-1" class="hidden px-6 pb-5 text-base text-gray-600 leading-relaxed border-t border-gray-100 pt-3">
+                        年滿 18 歲且具備中華民國國籍，提供身分證件與基本審核資料即可申請。您亦可直接至尚合雅門市由專員為您處理繁瑣手續。
+                    </div>
+                </div>
+
+                <!-- Q2 -->
+                <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+                    <button onclick="toggleFaq(2)" class="w-full px-6 py-5 text-left flex justify-between items-center font-bold text-gray-900 text-lg focus:outline-none">
+                        <span>Q2. 合約期間家電若故障，需要支付維修費用嗎？</span>
+                        <i id="faqIcon-2" class="fa-solid fa-chevron-down text-gray-400 transition-transform duration-300"></i>
+                    </button>
+                    <div id="faqAns-2" class="hidden px-6 pb-5 text-base text-gray-600 leading-relaxed border-t border-gray-100 pt-3">
+                        非人為因素造成的故障，在約定合約期間內全數由 LG 官方原廠提供維修保障與工程師專人到府檢修。
+                    </div>
+                </div>
+
+                <!-- Q3 -->
+                <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden shadow-sm">
+                    <button onclick="toggleFaq(3)" class="w-full px-6 py-5 text-left flex justify-between items-center font-bold text-gray-900 text-lg focus:outline-none">
+                        <span>Q3. 合約期滿之後，產品是否自動歸客戶所有？</span>
+                        <i id="faqIcon-3" class="fa-solid fa-chevron-down text-gray-400 transition-transform duration-300"></i>
+                    </button>
+                    <div id="faqAns-3" class="hidden px-6 pb-5 text-base text-gray-600 leading-relaxed border-t border-gray-100 pt-3">
+                        是的！本計畫採先享後擁有模式。只要合約期滿並付清所有約定款項，該家電機器之所有權即自動歸屬給您。
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 預約諮詢區塊 Contact Section -->
+    <section id="contact" class="py-20 bg-white">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-gray-50 border border-gray-200 rounded-3xl p-8 sm:p-12 shadow-sm">
+                <div class="text-center mb-10">
+                    <h2 class="text-3xl font-extrabold text-gray-900">專人預約諮詢服務</h2>
+                    <p class="text-base text-gray-600 mt-2">請留下您的聯絡資訊，尚合雅專業家電顧問將盡速主動聯繫您！</p>
+                </div>
+
+                <form id="contactForm" onsubmit="handleFormSubmit(event)" class="space-y-5">
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1.5">您的姓名 *</label>
+                        <input type="text" required placeholder="例如：王先生 / 陳小姐" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-base focus:outline-none focus:border-lg-red bg-white">
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1.5">聯絡電話 *</label>
+                            <input type="tel" required placeholder="0912-345-678" class="w-full border border-gray-300 rounded-xl px-4 py-3 text-base focus:outline-none focus:border-lg-red bg-white">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-1.5">方便聯繫時間</label>
+                            <select class="w-full border border-gray-300 rounded-xl px-4 py-3 text-base text-gray-700 focus:outline-none focus:border-lg-red bg-white">
+                                <option>不限時間</option>
+                                <option>上午 (09:00 - 12:00)</option>
+                                <option>下午 (14:00 - 18:00)</option>
+                                <option>晚上 (18:00 - 20:00)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-1.5">感興趣的 LG 家電或需求備註</label>
+                        <textarea id="contactNotes" rows="4" placeholder="例如：想了解衣櫥或洗乾衣機的月付詳情..." class="w-full border border-gray-300 rounded-xl px-4 py-3 text-base focus:outline-none focus:border-lg-red bg-white"></textarea>
+                    </div>
+
+                    <button type="submit" class="w-full bg-lg-red hover:bg-lg-darkRed text-white font-bold text-lg py-4 rounded-xl shadow-md transition-colors">
+                        送出預約諮詢
+                    </button>
+                </form>
+
+                <!-- 送出成功提示 -->
+                <div id="formSuccess" class="hidden mt-6 p-4 bg-green-50 border border-green-200 text-green-800 rounded-xl text-center text-base font-medium">
+                    <i class="fa-solid fa-circle-check text-green-600 mr-2"></i> 感謝您的預約！尚合雅家電顧問將盡速為您服務。
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 頁尾 Footer -->
+    <footer class="bg-gray-900 text-gray-400 py-12 border-t border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid md:grid-cols-3 gap-8 mb-8">
+                <div>
+                    <img src="icons/logo-white.png" alt="尚合雅 整合規劃 SHY APPLIANCE" width="620" height="120" class="h-10 w-auto mb-3" loading="lazy">
+                    <span class="text-lg font-black text-white block">尚合雅 LG 專賣</span>
+                    <p class="text-sm text-gray-400 mt-2 leading-relaxed">提供高品質 LG 家電銷售服務、月付美好計畫與完整售後維護支援。</p>
+                </div>
+                <div>
+                    <span class="text-base font-bold text-white block mb-3">相關連結</span>
+                    <ul class="space-y-2 text-sm">
+                        <li><a href="https://www.lgstore.com.tw/pages/rent" target="_blank" rel="noopener noreferrer" class="hover:text-white transition-colors flex items-center"><i class="fa-solid fa-link text-xs mr-2"></i> LG 官方月付美好計畫</a></li>
+                        <li><a href="#about" class="hover:text-white transition-colors">計畫核心特色</a></li>
+                        <li><a href="#calculator" class="hover:text-white transition-colors">月租費即時試算</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <span class="text-base font-bold text-white block mb-3">專人門市諮詢</span>
+                    <p class="text-sm text-gray-400 leading-relaxed">歡迎線上預約諮詢，我們將安排專業現場家電顧問協助規劃專屬方案。</p>
+                </div>
+            </div>
+            <div class="pt-8 border-t border-gray-800 text-center text-xs text-gray-500">
+                &copy; 尚合雅 LG月付美好計畫. All Rights Reserved.
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript 邏輯控制 -->
+    <script>
+        // 手機版選單切換
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+
+        function setMenu(open) {
+            mobileMenu.classList.toggle('hidden', !open);
+            mobileMenuBtn.setAttribute('aria-expanded', String(open));
+        }
+        mobileMenuBtn.addEventListener('click', () => {
+            setMenu(mobileMenu.classList.contains('hidden'));
+        });
+        // 點選選單連結後自動收合
+        mobileMenu.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => setMenu(false)));
+        // 放大到桌機寬度時重設選單
+        window.matchMedia('(min-width: 768px)').addEventListener('change', (e) => { if (e.matches) setMenu(false); });
+
+        // 試算器邏輯
+        let currentTenure = 36;
+        const calcProductName = document.getElementById('calcProductName');
+        const calcMonthlyFee = document.getElementById('calcMonthlyFee');
+        const displayMonthly = document.getElementById('displayMonthly');
+        const displayTenure = document.getElementById('displayTenure');
+        const displayTotal = document.getElementById('displayTotal');
+        const btn36 = document.getElementById('btn36');
+        const btn60 = document.getElementById('btn60');
+        const contactNotes = document.getElementById('contactNotes');
+
+        function updateCalculation() {
+            const fee = parseFloat(calcMonthlyFee.value) || 0;
+            const total = fee * currentTenure;
+            displayMonthly.textContent = `NT$ ${fee.toLocaleString()}`;
+            displayTenure.textContent = `${currentTenure} 個月`;
+            displayTotal.textContent = `NT$ ${total.toLocaleString()}`;
+        }
+
+        function setTenure(months) {
+            currentTenure = months;
+            if (months === 36) {
+                btn36.className = 'tenure-btn py-3 px-4 rounded-xl border border-red-500 bg-lg-red text-white font-bold text-base transition-all shadow-md';
+                btn60.className = 'tenure-btn py-3 px-4 rounded-xl border border-gray-600 bg-gray-700/50 text-gray-300 font-bold text-base transition-all';
+            } else {
+                btn60.className = 'tenure-btn py-3 px-4 rounded-xl border border-red-500 bg-lg-red text-white font-bold text-base transition-all shadow-md';
+                btn36.className = 'tenure-btn py-3 px-4 rounded-xl border border-gray-600 bg-gray-700/50 text-gray-300 font-bold text-base transition-all';
+            }
+            updateCalculation();
+        }
+
+        // =====================================================
+        // 商品資料：照片與月付金額取自 https://www.lgstore.com.tw/pages/rent
+        // 要新增 / 修改商品，只需編輯這個陣列
+        // =====================================================
+        const PRODUCTS = [
+        {
+                "name": "LG ALL NEW Styler 蒸氣電子衣櫥",
+                "model": "E523MR",
+                "price": 949,
+                "badge": "入門熱銷款",
+                "badgeCls": "bg-lg-red",
+                "desc": "蒸氣護理 / 除臭除皺 / 衣物管理",
+                "url": "https://www.lgstore.com.tw/products/0a405e53-13f4-4716-aa1f-d97cce13ab1b",
+                "img": "https://img.meepshop.com/HoCBpWdstMzvdk-hw_qplqGlf3j6S7HaHeCr48YoUHg/w:1200/Z3M6Ly9pbWcubWVlcGNsb3VkLmNvbS9tZWVwc2hvcC85NmYwMWEyMC1mODgyLTRmNDItOWFlNS1hM2VhMTMzMTgwZGUvZmlsZXMvMDBjZTZhYTgtYTMwYi00MDE5LWJhMTYtYjBjMDQ5OWQ3NzJiLnBuZw",
+                "icon": "fa-shirt"
+        },
+        {
+                "name": "LG AI DD 智慧直驅變頻洗衣機",
+                "model": "WT-TD23HG 23KG",
+                "price": 1159,
+                "badge": "家庭必備款",
+                "badgeCls": "bg-gray-800",
+                "desc": "AI DD 直驅馬達 / 大容量 23 公斤 / 提供三年、五年方案",
+                "url": "https://www.lgstore.com.tw/products/fb14519e-81b3-4a1b-a00e-f099c7e66a9d",
+                "img": "https://img.meepshop.com/Ugfu0aXYXtlGAvYH3mzY1OK3HgZO27XfD0dV9G1bpNo/w:1200/Z3M6Ly9pbWcubWVlcGNsb3VkLmNvbS9tZWVwc2hvcC85NmYwMWEyMC1mODgyLTRmNDItOWFlNS1hM2VhMTMzMTgwZGUvZmlsZXMvMzA2ZjFjMmUtYTBmNS00N2RkLTgyOTEtMjYxYTM3OTk5ZThiLmpwZw",
+                "icon": "fa-soap"
+        },
+        {
+                "name": "LG WashTower AI 智控洗乾衣機",
+                "model": "WD-S1818PB 18公斤",
+                "price": 3169,
+                "badge": "旗艦推薦款",
+                "badgeCls": "bg-blue-600",
+                "desc": "洗乾一體垂直堆疊 / AI 智控 / 提供三年、五年方案",
+                "url": "https://www.lgstore.com.tw/products/d04b5616-9abc-420a-8701-03791bd073df",
+                "img": "https://img.meepshop.com/iqT13K3ax0Ge7I00ZTyjRgd19FeAShD8b8zusy0lNA0/w:1200/Z3M6Ly9pbWcubWVlcGNsb3VkLmNvbS9tZWVwc2hvcC85NmYwMWEyMC1mODgyLTRmNDItOWFlNS1hM2VhMTMzMTgwZGUvZmlsZXMvY2E4ZDBhYmUtZWE3ZS00ZmE0LWFjNWUtNmJmNTRkYzU0OTc0LmpwZw",
+                "icon": "fa-soap"
+        },
+        {
+                "name": "LG DUALCOOL WiFi 雙迴轉變頻空調",
+                "model": "一對三 極淨2.0系列",
+                "price": 4550,
+                "badge": "空調旗艦組合",
+                "badgeCls": "bg-blue-600",
+                "desc": "WiFi 雙迴轉變頻 / 一對三多房配置 / 提供三年、七年方案",
+                "url": "https://www.lgstore.com.tw/products/96b9b16c-2992-41d5-b00c-766c474e8392",
+                "img": "https://img.meepshop.com/iqljyzvhRyTKEC2PzCNQ7uLUP8ImUskRZ0X-FkKlIeU/w:1200/Z3M6Ly9pbWcubWVlcGNsb3VkLmNvbS9tZWVwc2hvcC85NmYwMWEyMC1mODgyLTRmNDItOWFlNS1hM2VhMTMzMTgwZGUvZmlsZXMvZDhiMzgyOTMtYzNhNS00Y2ExLTk0NDctMDZjNTk4NTMwZGZkLnBuZw",
+                "icon": "fa-snowflake"
+        },
+        {
+                "name": "LG PuriCare 雙變頻除濕機",
+                "model": "DE221MWE0 22公升",
+                "price": 569,
+                "badge": "梅雨季必備",
+                "badgeCls": "bg-teal-600",
+                "desc": "雙變頻除濕 / 22 公升大容量 / 另有 12、16、18 公升可選",
+                "url": "https://www.lgstore.com.tw/products/97db9cab-8d28-494c-bb5d-549db36cdfee",
+                "img": "https://img.meepshop.com/bwizC3wLl8fGOyaFUHWg-HlyxhxbcjZ5mu8nSRkKrHM/w:1200/Z3M6Ly9pbWcubWVlcGNsb3VkLmNvbS9tZWVwc2hvcC85NmYwMWEyMC1mODgyLTRmNDItOWFlNS1hM2VhMTMzMTgwZGUvZmlsZXMvZWMyNzEyOTQtMzA0Ny00NjcyLWE5NWYtMTMzOTJkOGU3MTFhLnBuZw",
+                "icon": "fa-droplet"
+        }
+];
+
+        function esc(t) {
+            return String(t).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        }
+
+        function renderProducts() {
+            const grid = document.getElementById('productGrid');
+            if (!grid) return;
+            const cards = PRODUCTS.map((p, i) => `
+                <article class="bg-white rounded-3xl overflow-hidden border border-gray-200 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col">
+                    <div class="relative bg-white aspect-[4/3] flex items-center justify-center overflow-hidden border-b border-gray-100">
+                        <i class="fa-solid ${esc(p.icon)} text-6xl text-gray-300 absolute"></i>
+                        <img src="${esc(p.img)}" alt="${esc(p.name + ' ' + p.model)}" loading="lazy" decoding="async"
+                             referrerpolicy="no-referrer" width="400" height="300"
+                             class="relative w-full h-full object-contain p-4"
+                             onerror="this.style.display='none'">
+                        <span class="absolute top-4 left-4 ${esc(p.badgeCls)} text-white text-xs font-bold px-3 py-1 rounded-full shadow">${esc(p.badge)}</span>
+                    </div>
+                    <div class="p-6 flex-1 flex flex-col">
+                        <h3 class="text-xl font-bold text-gray-900 leading-snug">${esc(p.name)}</h3>
+                        <p class="text-sm font-semibold text-gray-600 mt-1">${esc(p.model)}</p>
+                        <p class="text-sm text-gray-500 mt-2 flex-1">${esc(p.desc)}</p>
+                        <div class="mt-5 pt-4 border-t border-gray-100 flex justify-between items-baseline">
+                            <span class="text-sm text-gray-500 font-medium">官網月付金</span>
+                            <div>
+                                <span class="text-3xl font-extrabold text-lg-red">NT$ ${p.price.toLocaleString('en-US')}</span>
+                                <span class="text-xs text-gray-500"> /月起</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-5 bg-gray-50 border-t border-gray-100 grid grid-cols-2 gap-3">
+                        <button type="button" data-idx="${i}" class="calc-btn bg-white hover:bg-gray-100 text-gray-900 font-bold text-sm py-3 rounded-xl border border-gray-300 transition-all flex items-center justify-center">
+                            <i class="fa-solid fa-calculator mr-2 text-lg-red"></i>試算
+                        </button>
+                        <a href="${esc(p.url)}" target="_blank" rel="noopener" class="bg-lg-red hover:bg-lg-darkRed text-white font-bold text-sm py-3 rounded-xl transition-all flex items-center justify-center">
+                            官網詳情<i class="fa-solid fa-arrow-up-right-from-square ml-2 text-xs"></i>
+                        </a>
+                    </div>
+                </article>`).join('');
+
+            const more = `
+                <article class="bg-gradient-to-br from-gray-900 to-gray-800 text-white rounded-3xl p-8 flex flex-col justify-center items-center text-center border border-gray-700 min-h-[18rem]">
+                    <i class="fa-solid fa-store text-5xl text-red-400 mb-5"></i>
+                    <h3 class="text-xl font-bold">想看更多型號？</h3>
+                    <p class="text-sm text-gray-300 mt-2 mb-6">冷氣、冰箱、洗衣機、吸塵器、洗碗機、空氣清淨機⋯⋯全系列月付方案</p>
+                    <a href="https://www.lgstore.com.tw/pages/rent" target="_blank" rel="noopener" class="bg-white text-gray-900 hover:bg-gray-100 font-bold px-6 py-3 rounded-full transition-all">前往官方商店</a>
+                </article>`;
+
+            grid.innerHTML = cards + more;
+            grid.querySelectorAll('.calc-btn').forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    const p = PRODUCTS[Number(btn.dataset.idx)];
+                    selectProduct(`${p.name} ${p.model}`, p.price);
+                });
+            });
+        }
+
+        function selectProduct(name, price) {
+            calcProductName.value = name;
+            calcMonthlyFee.value = price;
+            contactNotes.value = `想了解「${name}」月付方案 (預估每月 $${price})`;
+            updateCalculation();
+
+            // 平滑滾動至試算器
+            document.getElementById('calculator').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        calcMonthlyFee.addEventListener('input', updateCalculation);
+        renderProducts();
+
+        // FAQ 折疊效果
+        function toggleFaq(id) {
+            const ans = document.getElementById(`faqAns-${id}`);
+            const icon = document.getElementById(`faqIcon-${id}`);
+            
+            if (ans.classList.contains('hidden')) {
+                ans.classList.remove('hidden');
+                icon.classList.add('rotate-180');
+            } else {
+                ans.classList.add('hidden');
+                icon.classList.remove('rotate-180');
+            }
+        }
+
+        // 表單提交處理
+        function handleFormSubmit(event) {
+            event.preventDefault();
+            const successBox = document.getElementById('formSuccess');
+            successBox.classList.remove('hidden');
+            event.target.reset();
+
+            setTimeout(() => {
+                successBox.classList.add('hidden');
+            }, 5000);
+        }
+
+        // =====================================================
+        // PWA：Service Worker、安裝提示、離線提示、更新提示
+        // =====================================================
+        (function () {
+            const $ = (id) => document.getElementById(id);
+            const show = (el) => el.classList.add('show');
+            const hide = (el) => el.classList.remove('show');
+            const safe = (fn, fallback) => { try { return fn(); } catch (e) { return fallback; } };
+
+            // ---- Service Worker 註冊與更新 ----
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('sw.js').then((reg) => {
+                        const promptUpdate = (worker) => {
+                            show($('updateToast'));
+                            $('updateBtn').onclick = () => worker.postMessage({ type: 'SKIP_WAITING' });
+                        };
+                        if (reg.waiting && navigator.serviceWorker.controller) promptUpdate(reg.waiting);
+                        reg.addEventListener('updatefound', () => {
+                            const nw = reg.installing;
+                            nw && nw.addEventListener('statechange', () => {
+                                if (nw.state === 'installed' && navigator.serviceWorker.controller) promptUpdate(nw);
+                            });
+                        });
+                        // 回到前景時檢查更新
+                        document.addEventListener('visibilitychange', () => {
+                            if (document.visibilityState === 'visible') reg.update().catch(() => {});
+                        });
+                    }).catch((err) => console.warn('SW 註冊失敗:', err));
+
+                    let reloaded = false;
+                    navigator.serviceWorker.addEventListener('controllerchange', () => {
+                        if (reloaded) return; reloaded = true; location.reload();
+                    });
+                });
+            }
+
+            // ---- 安裝提示 ----
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+            const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) ||
+                          (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+            const DISMISS_KEY = 'lg_install_dismissed';
+            const dismissed = () => safe(() => Number(localStorage.getItem(DISMISS_KEY)) > Date.now(), false);
+            let deferredPrompt = null;
+
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                if (!isStandalone && !dismissed()) setTimeout(() => show($('installBanner')), 3000);
+            });
+
+            $('installBtn').addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    await deferredPrompt.userChoice;
+                    deferredPrompt = null;
+                }
+                hide($('installBanner'));
+            });
+            $('installClose').addEventListener('click', () => {
+                hide($('installBanner'));
+                // 7 天內不再顯示
+                safe(() => localStorage.setItem(DISMISS_KEY, String(Date.now() + 7 * 864e5)));
+            });
+            window.addEventListener('appinstalled', () => hide($('installBanner')));
+
+            // iOS Safari 沒有 beforeinstallprompt，改顯示操作說明
+            if (isIOS && !isStandalone && !dismissed()) {
+                $('installHint').textContent = '點下方「分享」圖示，選擇「加入主畫面」';
+                $('installBtn').style.display = 'none';
+                setTimeout(() => show($('installBanner')), 3000);
+            }
+
+            // ---- 離線 / 上線提示 ----
+            let netTimer;
+            function netStatus(online) {
+                const inner = $('netToastInner');
+                inner.className = 'rounded-2xl px-5 py-3 text-sm font-bold text-white shadow-2xl text-center ' +
+                                  (online ? 'bg-green-600' : 'bg-gray-800');
+                inner.textContent = online ? '已恢復連線' : '目前離線，仍可瀏覽已快取的內容';
+                show($('netToast'));
+                clearTimeout(netTimer);
+                if (online) netTimer = setTimeout(() => hide($('netToast')), 2500);
+            }
+            window.addEventListener('offline', () => netStatus(false));
+            window.addEventListener('online', () => netStatus(true));
+            if (!navigator.onLine) netStatus(false);
+        })();
+    </script>
+</body>
+</html>
